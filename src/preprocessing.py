@@ -2,9 +2,12 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn import preprocessing
+from scipy import stats
+from scipy.spatial.distance import mahalanobis
 import matplotlib.pyplot as plt
 import seaborn as sns
 from pandas.plotting import scatter_matrix
+from collections import defaultdict
 
 
 
@@ -36,16 +39,14 @@ def impute_missing(df):
     df_cat.head()
     imp_cat = SimpleImputer(strategy='most_frequent')
     df_cat = pd.DataFrame(imp_cat.fit_transform(df_cat),index=df_cat.index,columns=df_cat.columns)
-    ohe = preprocessing.OneHotEncoder(sparse=False)
-    df_cat_ohe = pd.DataFrame(ohe.fit_transform(df_cat),
-                          index=df_cat.index,columns=ohe.get_feature_names(df_cat.columns.tolist()))
-    df_cat_ohe.head()
+    d = defaultdict(preprocessing.LabelEncoder)
+    df_cat_le = df_cat.apply(lambda col: d[col.name].fit_transform(col)) 
     
     #NUMERICAL
     imp_num = SimpleImputer(strategy='mean') #although variables are continuous only integer values. Can use mean?
     df_num = pd.DataFrame(imp_num.fit_transform(df_num),index=df_num.index,columns=df_num.columns)
     
-    df_preprocessed = pd.merge(left=df_cat_ohe,right=df_num,on='ID')
+    df_preprocessed = pd.merge(left=df_cat_le,right=df_num,on='ID')
     return df_preprocessed
 
 
