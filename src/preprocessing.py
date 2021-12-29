@@ -1,55 +1,47 @@
-import pandas as pd
-import numpy as np
-from sklearn.impute import SimpleImputer
-from sklearn import preprocessing
 import matplotlib.pyplot as plt
-import seaborn as sns
+
+import numpy as np
+
+import pandas as pd
 from pandas.plotting import scatter_matrix
 
+import seaborn as sns
 
-
+from sklearn.impute import SimpleImputer
+from sklearn import preprocessing
 
 def mark_missing(df):
     nan_is_0 = ["TEMP","HEART_RATE","GLUCOSE","SAT_O2","BLOOD_PRES_SYS","BLOOD_PRES_DIAS"]
     df[nan_is_0] = df[nan_is_0].replace(0,np.nan)
     return df
 
-
-
-
 def drop_not_understandable(df):
     df.pop("GLUCOSE")
     df.pop("DESTINATION")
     return df
-
-
-
 
 def impute_missing(df):
     cat_mask = (df.dtypes == 'object')
     cat_cols = df.columns[cat_mask].tolist()
 
     df_cat = df[cat_cols]
-    df_num = df.drop(cat_cols,axis=1)
+    df_num = df.drop(cat_cols, axis = 1)
     
     #CATEGORICAL
     df_cat.head()
-    imp_cat = SimpleImputer(strategy='most_frequent')
-    df_cat = pd.DataFrame(imp_cat.fit_transform(df_cat),index=df_cat.index,columns=df_cat.columns)
-    ohe = preprocessing.OneHotEncoder(sparse=False)
+    imp_cat = SimpleImputer(strategy = 'most_frequent')
+    df_cat = pd.DataFrame(imp_cat.fit_transform(df_cat), index = df_cat.index, columns = df_cat.columns)
+    ohe = preprocessing.OneHotEncoder(sparse = False)
     df_cat_ohe = pd.DataFrame(ohe.fit_transform(df_cat),
-                          index=df_cat.index,columns=ohe.get_feature_names(df_cat.columns.tolist()))
+                          index = df_cat.index, columns = ohe.get_feature_names(df_cat.columns.tolist()))
     df_cat_ohe.head()
     
     #NUMERICAL
-    imp_num = SimpleImputer(strategy='mean') #although variables are continuous only integer values. Can use mean?
-    df_num = pd.DataFrame(imp_num.fit_transform(df_num),index=df_num.index,columns=df_num.columns)
+    imp_num = SimpleImputer(strategy = 'mean') # although variables are continuous only integer values. Can use mean?
+    df_num = pd.DataFrame(imp_num.fit_transform(df_num), index = df_num.index, columns = df_num.columns)
     
-    df_preprocessed = pd.merge(left=df_cat_ohe,right=df_num,on='ID')
+    df_preprocessed = pd.merge(left = df_cat_ohe, right = df_num, on = 'ID')
     return df_preprocessed
-
-
-
 
 def remove_outliers(df):
     for index, row in df.iterrows():
@@ -74,38 +66,29 @@ def remove_outliers(df):
     
     return df
 
-
-
-
 def scale_data(df):
     columns = df.columns
     index = df.index
     mms = preprocessing.MinMaxScaler() #MinMaxScaler to keep dummy vars
     df = mms.fit_transform(df)
-    df = pd.DataFrame(df,index=index,columns=columns)
+    df = pd.DataFrame(df, index = index, columns = columns)
     return df
 
-
-
-
-def discretize_data(df,k):
+def discretize_data(df, k):
     columns = df.columns
     index = df.index
-    binner = preprocessing.KBinsDiscretizer(n_bins=k,encode="onehot-dense")
+    binner = preprocessing.KBinsDiscretizer(n_bins = k, encode = "onehot-dense")
     df = pd.DataFrame(binner.fit_transform(df))
     return df
 
-
-
-
-def preprocess_data(df,scaler,k):
+def preprocess_data(df, scaler, k):
     df = mark_missing(df)
     df = drop_not_understandable(df)
     df = impute_missing(df)
-    df = remove_outliers(df)
-    if scaler == 1: #only scale if scaler = 1
+    # df = remove_outliers(df)
+    if scaler == 1: # only scale if scaler = 1
         df = scale_data(df)
-    if k > 1: #if 0 or 1 no discretizing. Otherwise number is the number of bins
+    if k > 1: # if 0 or 1 no discretizing. Otherwise number is the number of bins
         df = discretize_data(df,k)
     return df
 
