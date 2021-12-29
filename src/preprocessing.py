@@ -92,7 +92,7 @@ def preprocess_data(df, scaler, k):
     df = mark_missing(df)
     df = drop_not_understandable(df)
     df = impute_missing(df)
-    # df = remove_outliers(df)
+    df = remove_outliers(df)
     if scaler == 1: # only scale if scaler = 1
         df = scale_data(df)
     if k > 1: # if 0 or 1 no discretizing. Otherwise number is the number of bins
