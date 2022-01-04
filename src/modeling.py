@@ -30,10 +30,6 @@ def gaussian_nb_model():
 def svm_model():
 	return SVC(kernel = 'linear', C = 1.0)
 
-# Linear Regression
-def linear_reg_model():
-	return LinearRegression()
-
 # Logistic Regression
 def logistic_reg_model():
 	return LogisticRegression()
@@ -45,7 +41,6 @@ def knn_model():
 class Model:
 	gaussian_nb_model = gaussian_nb_model
 	svm_model = svm_model
-	linear_reg_model = linear_reg_model
 	logistic_reg_model = logistic_reg_model
 	knn_model = knn_model
 
